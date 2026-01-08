@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">Moja dostupnost</h1>
+    <div class="text-muted">Dodaj blokove dostupnosti (npr. 09:00–13:00).</div>
+  </div>
+  <a class="btn btn-primary" href="{% url 'availability_create' %}">+ Novi blok</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {% if blocks %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Od</th>
+              <th>Do</th>
+              <th class="text-end">Akcije</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in blocks %}
+              <tr>
+                <td>{{ b.date }}</td>
+                <td>{{ b.start_time }}</td>
+                <td>{{ b.end_time }}</td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'availability_update' b.pk %}">Uredi</a>
+                  <a class="btn btn-sm btn-outline-danger" href="{% url 'availability_delete' b.pk %}">Obriši</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-muted">Još nema blokova dostupnosti.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h4 mb-3">Rezervacija termina</h1>
+
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-4">{{ form.service }}</div>
+  <div class="col-md-4">{{ form.staff }}</div>
+  <div class="col-md-4">{{ form.date }}</div>
+  <div class="col-12">
+    <button class="btn btn-dark">Prikaži termine</button>
+  </div>
+</form>
+
+{% if slots %}
+  <h2 class="h5">Slobodni termini</h2>
+  <div class="list-group">
+    {% for s, e in slots %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="start" value="{{ s|date:'c' }}">
+        <input type="hidden" name="end" value="{{ e|date:'c' }}">
+        <button class="list-group-item list-group-item-action">
+          {{ s|date:"H:i" }} – {{ e|date:"H:i" }}
+        </button>
+      </form>
+    {% endfor %}
+  </div>
+{% elif form.is_bound %}
+  <div class="text-muted">Nema slobodnih termina za odabrani datum.</div>
+{% endif %}
+{% endblock %}

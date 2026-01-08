@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="h4">Brisanje dostupnosti</h1>
+    <p class="text-muted">
+      Jesi li siguran da želiš obrisati blok: <strong>{{ block.date }} {{ block.start_time }}–{{ block.end_time }}</strong>?
+    </p>
+
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <button class="btn btn-danger">Da, obriši</button>
+      <a class="btn btn-outline-secondary" href="{% url 'availability_list' %}">Odustani</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

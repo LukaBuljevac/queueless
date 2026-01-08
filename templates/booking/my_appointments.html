@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h4 mb-3">Moji termini</h1>
+
+{% if appointments %}
+  <ul class="list-group">
+    {% for a in appointments %}
+      <li class="list-group-item">
+        {{ a.start_dt|date:"d.m.Y H:i" }} –
+        {{ a.service.name }} ({{ a.status }})
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="text-muted">Još nemaš rezerviranih termina.</div>
+{% endif %}
+{% endblock %}
