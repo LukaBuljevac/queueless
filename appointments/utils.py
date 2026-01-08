@@ -1,27 +1,32 @@
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Tuple
+from django.utils import timezone
+
 from .models import AvailabilityBlock, Appointment
 
 SLOT_MINUTES = 30
 
-def generate_slots(staff, service, date) -> List[tuple]:
-    """
-    Vraća listu (start_dt, end_dt) slobodnih slotova
-    """
+def generate_slots(staff, service, date) -> List[Tuple[datetime, datetime]]:
     slots = []
 
     blocks = AvailabilityBlock.objects.filter(staff=staff, date=date)
+    duration = timedelta(minutes=service.duration_min)
+
+    tz = timezone.get_current_timezone()
+
+    # Učitaj termine koji blokiraju slotove
     appointments = Appointment.objects.filter(
         staff=staff,
         start_dt__date=date,
-        status__in=["PENDING", "APPROVED"]
+        status__in=[Appointment.Status.PENDING, Appointment.Status.APPROVED],
     )
 
-    duration = timedelta(minutes=service.duration_min)
-
     for block in blocks:
-        start = datetime.combine(date, block.start_time)
-        end = datetime.combine(date, block.end_time)
+        start_naive = datetime.combine(date, block.start_time)
+        end_naive = datetime.combine(date, block.end_time)
+
+        start = timezone.make_aware(start_naive, tz)
+        end = timezone.make_aware(end_naive, tz)
 
         current = start
         while current + duration <= end:
