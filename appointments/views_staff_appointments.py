@@ -11,7 +11,10 @@ from .permissions import staff_required
 @staff_required
 def staff_requests(request):
     staff = StaffProfile.objects.get(user=request.user)
-    appts = Appointment.objects.filter(staff=staff, status=Appointment.Status.PENDING).order_by("start_dt")
+    appts = Appointment.objects.filter(
+        staff=staff,
+        status=Appointment.Status.PENDING
+    ).order_by("start_dt")
     return render(request, "staff/requests.html", {"appointments": appts})
 
 @login_required
@@ -40,7 +43,6 @@ def staff_approve(request, pk: int):
         messages.error(request, "Termin nije u statusu PENDING.")
         return redirect("staff_requests")
 
-    # zaštita od konflikta (ako je netko drugi rezervirao u međuvremenu)
     conflict = Appointment.objects.select_for_update().filter(
         staff=staff,
         status=Appointment.Status.APPROVED,
@@ -84,13 +86,13 @@ def staff_mark_done(request, pk: int):
     appt = get_object_or_404(Appointment, pk=pk, staff=staff)
 
     if request.method != "POST":
-        return redirect("staff_schedule_today")
+        return redirect("staff_today")
 
     if appt.status != Appointment.Status.APPROVED:
         messages.error(request, "Samo APPROVED termin može biti označen kao DONE.")
-        return redirect("staff_schedule_today")
+        return redirect("staff_today")
 
     appt.status = Appointment.Status.DONE
     appt.save(update_fields=["status"])
     messages.success(request, "Termin označen kao DONE.")
-    return redirect("staff_schedule_today")
+    return redirect("staff_today")

@@ -27,7 +27,7 @@ urlpatterns = [
     path("staff/requests/", staff_requests, name="staff_requests"),
     path("staff/requests/<int:pk>/approve/", staff_approve, name="staff_approve"),
     path("staff/requests/<int:pk>/reject/", staff_reject, name="staff_reject"),
-    path("staff/today/", staff_schedule_today, name="staff_schedule_today"),
+    path("staff/today/", staff_schedule_today, name="staff_today"),
     path("staff/today/<int:pk>/done/", staff_mark_done, name="staff_mark_done"),
 
     # ADMIN
