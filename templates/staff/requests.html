@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h4 mb-3">Zahtjevi za termin (PENDING)</h1>
+
+{% if appointments %}
+  <div class="list-group">
+    {% for a in appointments %}
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div><strong>{{ a.start_dt|date:"d.m.Y H:i" }}</strong> — {{ a.service.name }}</div>
+            <div class="text-muted small">Klijent: {{ a.client.username }}</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <form method="post" action="{% url 'staff_approve' a.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-success">Approve</button>
+            </form>
+            <form method="post" action="{% url 'staff_reject' a.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger">Reject</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-muted">Nema pending zahtjeva.</div>
+{% endif %}
+{% endblock %}

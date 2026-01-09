@@ -39,10 +39,23 @@ def book_appointment(request):
                 messages.error(request, "Neispravan format datuma/vremena.")
                 return redirect(request.get_full_path())
 
-            # naive -> aware (lokalna TZ)
+            # ISO -> datetime (može biti naive ili aware)
             tz = timezone.get_current_timezone()
-            start_dt = timezone.make_aware(start_naive, tz)
-            end_dt = timezone.make_aware(end_naive, tz)
+
+            start_dt = start_naive
+            end_dt = end_naive
+
+            # Ako je naive -> napravi aware; ako je već aware -> samo prebaci u lokalnu TZ
+            if timezone.is_naive(start_dt):
+                start_dt = timezone.make_aware(start_dt, tz)
+            else:
+                start_dt = start_dt.astimezone(tz)
+
+            if timezone.is_naive(end_dt):
+                end_dt = timezone.make_aware(end_dt, tz)
+            else:
+                end_dt = end_dt.astimezone(tz)
+
 
             # PROVJERA KONFLIKTA (double-booking zaštita)
             conflict = Appointment.objects.filter(

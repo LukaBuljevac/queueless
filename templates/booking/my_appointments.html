@@ -3,14 +3,27 @@
 <h1 class="h4 mb-3">Moji termini</h1>
 
 {% if appointments %}
-  <ul class="list-group">
+  <div class="list-group">
     {% for a in appointments %}
-      <li class="list-group-item">
-        {{ a.start_dt|date:"d.m.Y H:i" }} –
-        {{ a.service.name }} ({{ a.status }})
-      </li>
+      <div class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div><strong>{{ a.start_dt|date:"d.m.Y H:i" }}</strong> — {{ a.service.name }}</div>
+            <div class="text-muted small">Status: {{ a.status }} · Djelatnik: {{ a.staff.user.username }}</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            {% if a.status == "PENDING" or a.status == "APPROVED" %}
+              <form method="post" action="{% url 'cancel_appointment' a.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Otkaži</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 {% else %}
   <div class="text-muted">Još nemaš rezerviranih termina.</div>
 {% endif %}

@@ -3,6 +3,11 @@
 <div class="bg-white p-4 rounded shadow-sm">
   <h1 class="h4">Staff dashboard</h1>
   <p class="text-muted">Upravljaj dostupnošću i terminima.</p>
-  <a class="btn btn-dark" href="{% url 'availability_list' %}">Moja dostupnost</a>
+
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-dark" href="{% url 'availability_list' %}">Moja dostupnost</a>
+    <a class="btn btn-primary" href="{% url 'staff_requests' %}">Zahtjevi (PENDING)</a>
+    <a class="btn btn-outline-dark" href="{% url 'staff_today' %}">Današnji raspored</a>
+  </div>
 </div>
 {% endblock %}
