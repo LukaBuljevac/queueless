@@ -85,11 +85,17 @@ def staff_mark_done(request, pk: int):
     staff = StaffProfile.objects.get(user=request.user)
     appt = get_object_or_404(Appointment, pk=pk, staff=staff)
 
+    # sigurnost: akcija mora biti POST
     if request.method != "POST":
-        return redirect("staff_today")
+        return redirect("staff_today")  # mora odgovarati name= u urls.py
 
     if appt.status != Appointment.Status.APPROVED:
         messages.error(request, "Samo APPROVED termin može biti označen kao DONE.")
+        return redirect("staff_today")
+
+    # ne dopusti da staff označi DONE prije početka termina
+    if timezone.now() < appt.start_dt:
+        messages.error(request, "Termin još nije započeo.")
         return redirect("staff_today")
 
     appt.status = Appointment.Status.DONE

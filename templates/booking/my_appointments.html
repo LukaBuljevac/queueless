@@ -8,8 +8,23 @@
       <div class="list-group-item">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <div><strong>{{ a.start_dt|date:"d.m.Y H:i" }}</strong> — {{ a.service.name }}</div>
-            <div class="text-muted small">Status: {{ a.status }} · Djelatnik: {{ a.staff.user.username }}</div>
+            <div>
+              <strong>{{ a.start_dt|date:"d.m.Y H:i" }}</strong> — {{ a.service.name }}
+            </div>
+
+            <div class="text-muted small d-flex align-items-center gap-2">
+              <span class="badge
+                {% if a.status == 'PENDING' %}bg-warning
+                {% elif a.status == 'APPROVED' %}bg-primary
+                {% elif a.status == 'DONE' %}bg-success
+                {% elif a.status == 'CANCELLED' %}bg-secondary
+                {% elif a.status == 'REJECTED' %}bg-danger
+                {% endif %}">
+                {{ a.status }}
+              </span>
+
+              <span>· Djelatnik: {{ a.staff.user.username }}</span>
+            </div>
           </div>
 
           <div class="d-flex gap-2">
@@ -18,6 +33,8 @@
                 {% csrf_token %}
                 <button class="btn btn-sm btn-outline-danger">Otkaži</button>
               </form>
+            {% else %}
+              <button class="btn btn-sm btn-outline-secondary" disabled>Otkaži</button>
             {% endif %}
           </div>
         </div>

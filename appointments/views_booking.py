@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -8,8 +9,10 @@ from .forms_booking import BookingSearchForm
 from .models import Appointment
 from .utils import generate_slots
 
+
 @login_required
 def book_appointment(request):
+    # autorizacija
     if request.user.role != "CLIENT":
         return render(request, "403.html", status=403)
 
@@ -21,31 +24,28 @@ def book_appointment(request):
         staff = form.cleaned_data["staff"]
         date = form.cleaned_data["date"]
 
+        # prikaz dostupnih slotova
         slots = generate_slots(staff, service, date)
 
+        # rezervacija odabranog slota
         if request.method == "POST":
             start_iso = request.POST.get("start")
             end_iso = request.POST.get("end")
 
             if not start_iso or not end_iso:
                 messages.error(request, "Neispravan zahtjev. Odaberi termin ponovno.")
-                return redirect(request.get_full_path())
+                return redirect(f"{request.path}?{request.META.get('QUERY_STRING','')}")
 
-            # ISO string -> naive datetime
             try:
-                start_naive = datetime.fromisoformat(start_iso)
-                end_naive = datetime.fromisoformat(end_iso)
+                start_dt = datetime.fromisoformat(start_iso)
+                end_dt = datetime.fromisoformat(end_iso)
             except ValueError:
                 messages.error(request, "Neispravan format datuma/vremena.")
-                return redirect(request.get_full_path())
+                return redirect(f"{request.path}?{request.META.get('QUERY_STRING','')}")
 
-            # ISO -> datetime (može biti naive ili aware)
             tz = timezone.get_current_timezone()
 
-            start_dt = start_naive
-            end_dt = end_naive
-
-            # Ako je naive -> napravi aware; ako je već aware -> samo prebaci u lokalnu TZ
+            # fromisoformat može vratiti naive ili aware — pokrij oba slučaja
             if timezone.is_naive(start_dt):
                 start_dt = timezone.make_aware(start_dt, tz)
             else:
@@ -56,8 +56,12 @@ def book_appointment(request):
             else:
                 end_dt = end_dt.astimezone(tz)
 
+            # ne dopusti rezervaciju u prošlosti
+            if start_dt < timezone.now():
+                messages.error(request, "Ne možeš rezervirati termin u prošlosti.")
+                return redirect(f"{request.path}?{request.META.get('QUERY_STRING','')}")
 
-            # PROVJERA KONFLIKTA (double-booking zaštita)
+            # double-booking zaštita (server-side)
             conflict = Appointment.objects.filter(
                 staff=staff,
                 status__in=[Appointment.Status.PENDING, Appointment.Status.APPROVED],
@@ -67,7 +71,7 @@ def book_appointment(request):
 
             if conflict:
                 messages.error(request, "Nažalost, taj termin je upravo zauzet. Osvježi i odaberi drugi.")
-                return redirect(request.get_full_path())
+                return redirect(f"{request.path}?{request.META.get('QUERY_STRING','')}")
 
             Appointment.objects.create(
                 client=request.user,
